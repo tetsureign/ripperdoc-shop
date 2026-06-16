@@ -1,208 +1,46 @@
-import { useState } from "react";
-import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { BrandDTO, brandsService } from "@/services/brandsService";
 import { Brand } from "@/types/brand";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { VisibilityState } from "@tanstack/react-table";
 import { UI_LABELS } from "@/lib/routes";
 
 import { brandFormSchema } from "./BrandForm";
 import pluralize from "pluralize";
-
-// ---------------------------------------------------------------------------
-// Primitive state hooks (UI only — no data fetching)
-// ---------------------------------------------------------------------------
-
-export function useTableState(includeDeleted = false) {
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
-    deletedAt: includeDeleted,
-  });
-  const [pageIndex, setPageIndex] = useState(0); // 0-based for TanStack Table
-  const [pageSize, setPageSize] = useState(10);
-
-  return {
-    columnVisibility,
-    setColumnVisibility,
-    pageIndex,
-    setPageIndex,
-    pageSize,
-    setPageSize,
-  };
-}
-
-export function useFormState() {
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [openSheet, setOpenSheet] = useState(false);
-
-  const form = useForm<z.infer<typeof brandFormSchema>>({
-    resolver: zodResolver(brandFormSchema),
-    defaultValues: { name: "", description: "" },
-  });
-
-  return {
-    isEditMode,
-    setIsEditMode,
-    openSheet,
-    setOpenSheet,
-    form,
-  };
-}
-
-export function useDeleteState() {
-  const [deleteMode, setDeleteMode] = useState<"soft" | "hard" | "restore">(
-    "soft",
-  );
-  const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
-  const [selectedBrandId, setSelectedBrandId] = useState<string>("");
-  const [alertMessage, setAlertMessage] = useState({
-    title: "",
-    description: "",
-  });
-
-  return {
-    deleteMode,
-    setDeleteMode,
-    openConfirmDialog,
-    setOpenConfirmDialog,
-    selectedBrandId,
-    setSelectedBrandId,
-    alertMessage,
-    setAlertMessage,
-  };
-}
-
-// ---------------------------------------------------------------------------
-// Query hooks
-// ---------------------------------------------------------------------------
-
-export const useBrandsQuery = (
-  includeDeleted = false,
-  page = 1,
-  pageSize = 10,
-) =>
-  useQuery({
-    queryKey: ["brands", { includeDeleted, page, pageSize }],
-    queryFn: async () => {
-      const response = await brandsService.getAll(
-        includeDeleted,
-        page,
-        pageSize,
-      );
-      return response.data;
-    },
-  });
-
-export const useBrandQuery = (brandId: string) =>
-  useQuery({
-    queryKey: ["brand", brandId],
-    queryFn: async () => {
-      const response = await brandsService.getById(brandId);
-      return response.data;
-    },
-    enabled: !!brandId,
-  });
-
-// ---------------------------------------------------------------------------
-// Mutation hooks
-// ---------------------------------------------------------------------------
-
-export const useCreateBrandMutation = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (brand: BrandDTO) => brandsService.create(brand),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["brands"] });
-    },
-  });
-};
-
-export const useUpdateBrandMutation = (brandId: string) => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (brand: BrandDTO) => brandsService.update(brandId, brand),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["brands"] });
-      queryClient.invalidateQueries({ queryKey: ["brand", brandId] });
-    },
-  });
-};
-
-export const useSoftDeleteBrandMutation = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (brandId: string) => brandsService.softDelete(brandId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["brands"] });
-    },
-  });
-};
-
-export const useHardDeleteBrandMutation = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (brandId: string) => brandsService.hardDelete(brandId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["brands"] });
-    },
-  });
-};
-
-export const useRestoreBrandMutation = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (brandId: string) => brandsService.restore(brandId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["brands"] });
-    },
-  });
-};
-
-// ---------------------------------------------------------------------------
-// Composite hook — orchestrates UI state + mutations
-// ---------------------------------------------------------------------------
+import { useDeleteState, useFormState, useTableState } from "./uiStates";
+import {
+  useCreateBrand,
+  useRestoreBrand,
+  useHardDeleteBrand,
+  useSoftDeleteBrand,
+  useUpdateBrand,
+} from "./network";
 
 export function useBrands() {
-  const [includeDeleted, setIncludeDeleted] = useState(false);
-  const [brand, setBrand] = useState<Brand>({
-    id: "",
-    name: "",
-    slug: "",
-    description: "",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    deletedAt: null,
-  });
-
-  const tableState = useTableState(includeDeleted);
+  const tableState = useTableState();
   const formState = useFormState();
   const deleteState = useDeleteState();
 
-  const createBrand = useCreateBrandMutation();
-  const updateBrand = useUpdateBrandMutation(brand.id);
-  const softDelete = useSoftDeleteBrandMutation();
-  const hardDelete = useHardDeleteBrandMutation();
-  const restore = useRestoreBrandMutation();
+  const createBrand = useCreateBrand();
+  const updateBrand = useUpdateBrand(formState.brand.id);
+  const softDelete = useSoftDeleteBrand();
+  const hardDelete = useHardDeleteBrand();
+  const restore = useRestoreBrand();
 
   const isDeleting =
     softDelete.isPending || hardDelete.isPending || restore.isPending;
 
   const isSubmitting = createBrand.isPending || updateBrand.isPending;
 
-  // -------------------------------------------------------------------------
-  // Handlers
-  // -------------------------------------------------------------------------
+  const toggleIncludeDeleted = (checked: boolean) => {
+    tableState.setIncludeDeleted(checked);
+    tableState.setColumnVisibility((prev) => ({
+      ...prev,
+      deletedAt: checked,
+    }));
+  };
 
-  const handleCreate = () => {
-    setBrand({
+  const openCreateForm = () => {
+    formState.setBrand({
       id: "",
       name: "",
       slug: "",
@@ -216,14 +54,14 @@ export function useBrands() {
     formState.setOpenSheet(true);
   };
 
-  const handleUpdate = (brand: Brand) => {
-    setBrand(brand);
+  const openEditForm = (brand: Brand) => {
+    formState.setBrand(brand);
     formState.form.reset({ name: brand.name, description: brand.description });
     formState.setIsEditMode(true);
     formState.setOpenSheet(true);
   };
 
-  const handleSoftDelete = (brandId: string) => {
+  const stageSoftDelete = (brandId: string) => {
     deleteState.setAlertMessage({
       title: "Trash it?",
       description: "Wanna trash it? You can dig it back later.",
@@ -233,7 +71,7 @@ export function useBrands() {
     deleteState.setOpenConfirmDialog(true);
   };
 
-  const handleHardDelete = (brandId: string) => {
+  const stageHardDelete = (brandId: string) => {
     deleteState.setAlertMessage({
       title: "Flatline this?",
       description: "You're reaching the point of no return.",
@@ -243,7 +81,7 @@ export function useBrands() {
     deleteState.setOpenConfirmDialog(true);
   };
 
-  const handleRestore = (brandId: string) => {
+  const stageRestore = (brandId: string) => {
     deleteState.setAlertMessage({
       title: "Revive it?",
       description: "Bring it back to life?",
@@ -253,7 +91,7 @@ export function useBrands() {
     deleteState.setOpenConfirmDialog(true);
   };
 
-  const handleConfirmDelOperation = async () => {
+  const executeStaged = async () => {
     const id = deleteState.selectedBrandId;
     const mode = deleteState.deleteMode;
 
@@ -287,7 +125,7 @@ export function useBrands() {
     }
   };
 
-  async function onSubmit(values: z.infer<typeof brandFormSchema>) {
+  async function submitForm(values: z.infer<typeof brandFormSchema>) {
     const label = pluralize.singular(UI_LABELS.brands.toLowerCase());
 
     const promise = formState.isEditMode
@@ -315,25 +153,18 @@ export function useBrands() {
   }
 
   return {
-    state: {
-      table: tableState,
-      form: formState,
-      delete: deleteState,
-      includeDeleted,
-      brand,
-      isDeleting,
-      isSubmitting,
-    },
-    actions: {
-      setIncludeDeleted,
-      setBrand,
-      handleCreate,
-      handleUpdate,
-      handleSoftDelete,
-      handleHardDelete,
-      handleRestore,
-      handleConfirmDelOperation,
-      onSubmit,
-    },
+    tableState,
+    formState,
+    deleteState,
+    isDeleting,
+    isSubmitting,
+    toggleIncludeDeleted,
+    openCreateForm,
+    openEditForm,
+    stageSoftDelete,
+    stageHardDelete,
+    stageRestore,
+    executeStaged,
+    submitForm,
   };
 }

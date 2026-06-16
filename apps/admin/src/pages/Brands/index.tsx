@@ -1,5 +1,4 @@
 import pluralize from "pluralize";
-import { useEffect } from "react";
 
 import { ConfirmationDialog } from "@/components/confirmation-dialog";
 import { DataTable } from "@/components/data-table";
@@ -13,32 +12,36 @@ import { UI_LABELS } from "@/lib/routes";
 
 import { BrandForm } from "./BrandForm";
 import { columns } from "./brandsTableColumns";
-import { useBrands, useBrandsQuery } from "./useBrands";
+import { useBrands } from "./useBrands";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useBrandsQuery } from "./network";
 
 export default function Brands() {
-  const { state, actions } = useBrands();
   const {
-    table,
-    form,
-    delete: deleteState,
-    includeDeleted,
+    tableState,
+    formState,
+    deleteState,
     isDeleting,
     isSubmitting,
-  } = state;
+    toggleIncludeDeleted,
+    openCreateForm,
+    openEditForm,
+    stageSoftDelete,
+    stageHardDelete,
+    stageRestore,
+    executeStaged,
+    submitForm,
+  } = useBrands();
 
   const {
     data: brandsData,
     isLoading,
     isError,
-  } = useBrandsQuery(includeDeleted, table.pageIndex + 1, table.pageSize);
-
-  useEffect(() => {
-    table.setColumnVisibility((prev) => ({
-      ...prev,
-      deletedAt: includeDeleted,
-    }));
-  }, [includeDeleted]);
+  } = useBrandsQuery(
+    tableState.includeDeleted,
+    tableState.pageIndex + 1,
+    tableState.pageSize,
+  );
 
   if (isError) {
     return (
@@ -53,14 +56,14 @@ export default function Brands() {
   return (
     <div className="container mx-auto flex flex-col gap-4">
       <div className="flex flex-row-reverse gap-4">
-        <Button id="create" onClick={actions.handleCreate} disabled={isLoading}>
+        <Button id="create" onClick={openCreateForm} disabled={isLoading}>
           Create
         </Button>
         <div className="flex items-center space-x-2">
           <Switch
             id="include-deleted"
             disabled={isLoading}
-            onCheckedChange={(checked) => actions.setIncludeDeleted(checked)}
+            onCheckedChange={toggleIncludeDeleted}
           />
           <Label htmlFor="include-deleted">Include deleted</Label>
         </div>
@@ -68,33 +71,36 @@ export default function Brands() {
 
       <DataTable
         columns={columns({
-          onUpdate: actions.handleUpdate,
-          onSoftDelete: actions.handleSoftDelete,
-          onHardDelete: actions.handleHardDelete,
-          onRestore: actions.handleRestore,
+          onUpdate: openEditForm,
+          onSoftDelete: stageSoftDelete,
+          onHardDelete: stageHardDelete,
+          onRestore: stageRestore,
         })}
         data={brandsData?.brands ?? []}
         loading={isLoading}
-        columnVisibility={table.columnVisibility}
-        setColumnVisibility={table.setColumnVisibility}
-        pageIndex={table.pageIndex}
-        pageSize={table.pageSize}
+        columnVisibility={tableState.columnVisibility}
+        setColumnVisibility={tableState.setColumnVisibility}
+        pageIndex={tableState.pageIndex}
+        pageSize={tableState.pageSize}
         pageCount={brandsData?.totalPages ?? 0}
-        onPageChange={table.setPageIndex}
-        onPageSizeChange={table.setPageSize}
+        onPageChange={tableState.setPageIndex}
+        onPageSizeChange={tableState.setPageSize}
       />
 
-      <InfoUpdateSheet open={form.openSheet} onOpenChange={form.setOpenSheet}>
+      <InfoUpdateSheet
+        open={formState.openSheet}
+        onOpenChange={formState.setOpenSheet}
+      >
         <SheetTitle>
-          {form.isEditMode
+          {formState.isEditMode
             ? `Update ${pluralize.singular(UI_LABELS.brands)}`
             : `Create ${pluralize.singular(UI_LABELS.brands)}`}
         </SheetTitle>
         <ScrollArea className="max-h-[90vh]">
           <BrandForm
-            form={form.form}
-            onSubmit={actions.onSubmit}
-            onCancel={() => form.setOpenSheet(false)}
+            form={formState.form}
+            onSubmit={submitForm}
+            onCancel={() => formState.setOpenSheet(false)}
             isLoading={isSubmitting}
           />
         </ScrollArea>
@@ -105,7 +111,7 @@ export default function Brands() {
         onOpenChange={deleteState.setOpenConfirmDialog}
         title={deleteState.alertMessage.title}
         description={deleteState.alertMessage.description}
-        onConfirm={actions.handleConfirmDelOperation}
+        onConfirm={executeStaged}
         isLoading={isDeleting}
       />
     </div>
