@@ -67,7 +67,7 @@ export function useFormState(brand: Brand) {
 
 export function useDeleteState() {
   const [deleteMode, setDeleteMode] = useState<"soft" | "hard" | "restore">(
-    "soft"
+    "soft",
   );
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
   const [selectedBrandId, setSelectedBrandId] = useState<string>("");
@@ -108,14 +108,14 @@ export function useBrands() {
   const fetchBrands = async (
     includeDeleted = false,
     page = 1,
-    pageSize = 10
+    pageSize = 10,
   ) => {
     try {
       tableState.setTableLoading(true);
       const response = await brandsService.getAll(
         includeDeleted,
         page,
-        pageSize
+        pageSize,
       );
       tableState.setData(response.data.brands);
       tableState.setTotalCount(response.data.totalCount);
@@ -196,31 +196,31 @@ export function useBrands() {
           break;
       }
 
-      await promise;
-
       toast.promise(promise, {
         loading: `${
           deleteState.deleteMode === "restore"
             ? "Restoring"
             : deleteState.deleteMode === "hard"
-            ? "Deleting"
-            : "Trashing"
+              ? "Deleting"
+              : "Trashing"
         } ${pluralize.singular(UI_LABELS.brands.toLowerCase())}...`,
         success: `${pluralize.singular(UI_LABELS.brands)} ${
           deleteState.deleteMode === "restore"
             ? "restored"
             : deleteState.deleteMode === "hard"
-            ? "deleted"
-            : "trashed"
+              ? "deleted"
+              : "trashed"
         } successfully`,
         error: `Failed to ${
           deleteState.deleteMode === "restore"
             ? "restore"
             : deleteState.deleteMode === "hard"
-            ? "delete"
-            : "trash"
+              ? "delete"
+              : "trash"
         } ${pluralize.singular(UI_LABELS.brands.toLowerCase())}`,
       });
+
+      await promise;
 
       await fetchBrands(includeDeleted);
     } catch (error) {
@@ -240,8 +240,6 @@ export function useBrands() {
         ? brandsService.update(brand.id, values)
         : brandsService.create(values);
 
-      await promise;
-
       toast.promise(promise, {
         loading: formState.isEditMode
           ? `Updating ${pluralize.singular(UI_LABELS.brands.toLowerCase())}...`
@@ -251,19 +249,21 @@ export function useBrands() {
           : `${pluralize.singular(UI_LABELS.brands)} created successfully`,
         error: formState.isEditMode
           ? `Failed to update ${pluralize.singular(
-              UI_LABELS.brands.toLowerCase()
+              UI_LABELS.brands.toLowerCase(),
             )}`
           : `Failed to create ${pluralize.singular(
-              UI_LABELS.brands.toLowerCase()
+              UI_LABELS.brands.toLowerCase(),
             )}`,
       });
+
+      await promise;
 
       await fetchBrands(includeDeleted);
       formState.setOpenSheet(false);
     } catch (error) {
       console.error(
         `Failed to update ${pluralize.singular(UI_LABELS.brands)}:`,
-        error
+        error,
       );
     } finally {
       formState.setIsDataLoading(false);

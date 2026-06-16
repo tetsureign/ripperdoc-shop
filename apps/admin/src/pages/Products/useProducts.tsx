@@ -73,7 +73,7 @@ export function useFormState(product: Product) {
 
 export function useDeleteState() {
   const [deleteMode, setDeleteMode] = useState<"soft" | "hard" | "restore">(
-    "soft"
+    "soft",
   );
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState<string>("");
@@ -121,14 +121,14 @@ export function useProducts() {
   const fetchProducts = async (
     includeDeleted = false,
     page = 1,
-    pageSize = 10
+    pageSize = 10,
   ) => {
     try {
       tableState.setTableLoading(true);
       const response = await productsService.getAll(
         includeDeleted,
         page,
-        pageSize
+        pageSize,
       );
       tableState.setData(response.data.products);
       tableState.setTotalCount(response.data.totalCount);
@@ -216,31 +216,31 @@ export function useProducts() {
           break;
       }
 
-      await promise;
-
       toast.promise(promise, {
         loading: `${
           deleteState.deleteMode === "restore"
             ? "Restoring"
             : deleteState.deleteMode === "hard"
-            ? "Deleting"
-            : "Trashing"
+              ? "Deleting"
+              : "Trashing"
         } ${pluralize.singular(UI_LABELS.products.toLowerCase())}...`,
         success: `${pluralize.singular(UI_LABELS.products)} ${
           deleteState.deleteMode === "restore"
             ? "restored"
             : deleteState.deleteMode === "hard"
-            ? "deleted"
-            : "trashed"
+              ? "deleted"
+              : "trashed"
         } successfully`,
         error: `Failed to ${
           deleteState.deleteMode === "restore"
             ? "restore"
             : deleteState.deleteMode === "hard"
-            ? "delete"
-            : "trash"
+              ? "delete"
+              : "trash"
         } ${pluralize.singular(UI_LABELS.products.toLowerCase())}`,
       });
+
+      await promise;
 
       await fetchProducts(includeDeleted);
     } catch (error) {
@@ -265,34 +265,34 @@ export function useProducts() {
         ? productsService.update(product.id!, payload)
         : productsService.create(payload);
 
-      await promise;
-
       toast.promise(promise, {
         loading: formState.isEditMode
           ? `Updating ${pluralize.singular(
-              UI_LABELS.products.toLowerCase()
+              UI_LABELS.products.toLowerCase(),
             )}...`
           : `Creating ${pluralize.singular(
-              UI_LABELS.products.toLowerCase()
+              UI_LABELS.products.toLowerCase(),
             )}...`,
         success: formState.isEditMode
           ? `${pluralize.singular(UI_LABELS.products)} updated successfully`
           : `${pluralize.singular(UI_LABELS.products)} created successfully`,
         error: formState.isEditMode
           ? `Failed to update ${pluralize.singular(
-              UI_LABELS.products.toLowerCase()
+              UI_LABELS.products.toLowerCase(),
             )}`
           : `Failed to create ${pluralize.singular(
-              UI_LABELS.products.toLowerCase()
+              UI_LABELS.products.toLowerCase(),
             )}`,
       });
+
+      await promise;
 
       await fetchProducts(includeDeleted);
       formState.setOpenSheet(false);
     } catch (error) {
       console.error(
         `Failed to update ${pluralize.singular(UI_LABELS.products)}:`,
-        error
+        error,
       );
     } finally {
       formState.setIsDataLoading(false);
@@ -304,13 +304,13 @@ export function useProducts() {
       formState.setIsDataLoading(true);
       const promise = productsService.feature(productID);
 
-      await promise;
-
       toast.promise(promise, {
         loading: "Featuring product...",
         success: "Product featured.",
         error: "Error featuring product.",
       });
+
+      await promise;
 
       await fetchProducts(includeDeleted);
     } catch (err) {
@@ -325,13 +325,13 @@ export function useProducts() {
       formState.setIsDataLoading(true);
       const promise = productsService.unfeature(productID);
 
-      await promise;
-
       toast.promise(promise, {
         loading: "Unfeaturing product...",
         success: "Product unfeatured.",
         error: "Error unfeaturing product.",
       });
+
+      await promise;
 
       await fetchProducts(includeDeleted);
     } catch (err) {

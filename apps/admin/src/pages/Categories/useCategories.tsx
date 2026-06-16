@@ -67,7 +67,7 @@ export function useFormState(category: Category) {
 
 export function useDeleteState() {
   const [deleteMode, setDeleteMode] = useState<"soft" | "hard" | "restore">(
-    "soft"
+    "soft",
   );
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
@@ -108,14 +108,14 @@ export function useCategories() {
   const fetchCategories = async (
     includeDeleted = false,
     page = 1,
-    pageSize = 10
+    pageSize = 10,
   ) => {
     try {
       tableState.setTableLoading(true);
       const response = await categoriesService.getAll(
         includeDeleted,
         page,
-        pageSize
+        pageSize,
       );
       tableState.setData(response.data.categories);
       tableState.setTotalCount(response.data.totalCount);
@@ -187,12 +187,12 @@ export function useCategories() {
       switch (deleteState.deleteMode) {
         case "soft":
           promise = categoriesService.softDelete(
-            deleteState.selectedCategoryId
+            deleteState.selectedCategoryId,
           );
           break;
         case "hard":
           promise = categoriesService.hardDelete(
-            deleteState.selectedCategoryId
+            deleteState.selectedCategoryId,
           );
           break;
         case "restore":
@@ -200,31 +200,31 @@ export function useCategories() {
           break;
       }
 
-      await promise;
-
       toast.promise(promise, {
         loading: `${
           deleteState.deleteMode === "restore"
             ? "Restoring"
             : deleteState.deleteMode === "hard"
-            ? "Deleting"
-            : "Trashing"
+              ? "Deleting"
+              : "Trashing"
         } ${pluralize.singular(UI_LABELS.categories.toLowerCase())}...`,
         success: `${pluralize.singular(UI_LABELS.categories)} ${
           deleteState.deleteMode === "restore"
             ? "restored"
             : deleteState.deleteMode === "hard"
-            ? "deleted"
-            : "trashed"
+              ? "deleted"
+              : "trashed"
         } successfully`,
         error: `Failed to ${
           deleteState.deleteMode === "restore"
             ? "restore"
             : deleteState.deleteMode === "hard"
-            ? "delete"
-            : "trash"
+              ? "delete"
+              : "trash"
         } ${pluralize.singular(UI_LABELS.categories.toLowerCase())}`,
       });
+
+      await promise;
 
       await fetchCategories(includeDeleted);
     } catch (error) {
@@ -244,34 +244,34 @@ export function useCategories() {
         ? categoriesService.update(category.id, values)
         : categoriesService.create(values);
 
-      await promise;
-
       toast.promise(promise, {
         loading: formState.isEditMode
           ? `Updating ${pluralize.singular(
-              UI_LABELS.categories.toLowerCase()
+              UI_LABELS.categories.toLowerCase(),
             )}...`
           : `Creating ${pluralize.singular(
-              UI_LABELS.categories.toLowerCase()
+              UI_LABELS.categories.toLowerCase(),
             )}...`,
         success: formState.isEditMode
           ? `${pluralize.singular(UI_LABELS.categories)} updated successfully`
           : `${pluralize.singular(UI_LABELS.categories)} created successfully`,
         error: formState.isEditMode
           ? `Failed to update ${pluralize.singular(
-              UI_LABELS.categories.toLowerCase()
+              UI_LABELS.categories.toLowerCase(),
             )}`
           : `Failed to create ${pluralize.singular(
-              UI_LABELS.categories.toLowerCase()
+              UI_LABELS.categories.toLowerCase(),
             )}`,
       });
+
+      await promise;
 
       await fetchCategories(includeDeleted);
       formState.setOpenSheet(false);
     } catch (error) {
       console.error(
         `Failed to update ${pluralize.singular(UI_LABELS.categories)}:`,
-        error
+        error,
       );
     } finally {
       formState.setIsDataLoading(false);
