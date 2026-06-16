@@ -1,24 +1,12 @@
-import { useEffect, useState } from "react";
-import { authService, User } from "@/services/authService";
+import { authService } from "@/services/authService";
+import { useQuery } from "@tanstack/react-query";
 
 export const useAuth = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const query = useQuery({
+    queryKey: ["auth", "whoami"],
+    queryFn: () => authService.whoami().then((r) => r.data),
+    retry: false, // don't retry on 401
+  });
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const res = await authService.whoami();
-        setUser(res.data);
-      } catch (err) {
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUser();
-  }, []);
-
-  return { user, loading };
+  return { user: query.data, loading: query.isLoading };
 };
