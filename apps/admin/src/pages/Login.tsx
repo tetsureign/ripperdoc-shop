@@ -26,10 +26,14 @@ export default function Login() {
       navigate(APP_ROUTES.dashboard.url);
     } catch (err) {
       if (err instanceof AxiosError) {
-        err.response?.data
-          ? setError(err.response?.data)
-          : setError(err.message);
-      } else setError("Unknown error occurred");
+        if (err.response?.data) {
+          setError(err.response?.data);
+        } else {
+          setError(err.message);
+        }
+      } else {
+        setError("Unknown error occurred");
+      }
     } finally {
       setLoading(false);
     }

@@ -18,14 +18,16 @@ type LoginFormProps = {
   password: string;
   onEmailChange: (value: string) => void;
   onPasswordChange: (value: string) => void;
+  onSubmit?: React.SubmitEventHandler<HTMLFormElement>;
   isLoading?: boolean;
-} & React.ComponentProps<"div">;
+} & Omit<React.ComponentProps<"div">, "onSubmit">;
 
 export function LoginForm({
   email,
   password,
   onEmailChange,
   onPasswordChange,
+  onSubmit,
   isLoading = false,
   className,
   ...props
@@ -40,7 +42,7 @@ export function LoginForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={() => props.onSubmit}>
+          <form onSubmit={onSubmit}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-3">
                 <Label htmlFor="email">Email</Label>
