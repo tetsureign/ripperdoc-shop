@@ -1,6 +1,6 @@
 import { Loader2 } from "lucide-react";
 import pluralize from "pluralize";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { toast } from "sonner";
 import z from "zod";
@@ -24,11 +24,9 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { UI_LABELS } from "@/lib/routes";
-import { brandsService } from "@/services/brandsService";
-import { categoriesService } from "@/services/categoriesService";
 import { imageService } from "@/services/imageService";
-import { Brand } from "@/types/brand";
-import { Category } from "@/types/category";
+import { useBrandsQuery } from "../Brands/network";
+import { useCategoriesQuery } from "../Categories/network";
 
 export const productFormSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -54,51 +52,13 @@ export function ProductForm({
   onCancel: () => void;
   isLoading?: boolean;
 }) {
-  const [loadingFields, setLoadingFields] = useState(false);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [brands, setBrands] = useState<Brand[]>([]);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
-  const fetchCategories = async (
-    includeDeleted = false,
-    page = 1,
-    pageSize = 50
-  ) => {
-    try {
-      setLoadingFields(true);
-      const response = await categoriesService.getAll(
-        includeDeleted,
-        page,
-        pageSize
-      );
-      setCategories(response.data.categories);
-    } catch (err) {
-      toast.error("Unable to fetch catagories");
-      console.error(err);
-    } finally {
-      setLoadingFields(false);
-    }
-  };
+  const { data: categoriesData, isLoading: isLoadingCategories } = useCategoriesQuery(false, 1, 50);
+  const { data: brandsData, isLoading: isLoadingBrands } = useBrandsQuery(false, 1, 50);
 
-  const fetchBrands = async (
-    includeDeleted = false,
-    page = 1,
-    pageSize = 50
-  ) => {
-    try {
-      setLoadingFields(true);
-      const response = await brandsService.getAll(
-        includeDeleted,
-        page,
-        pageSize
-      );
-      setBrands(response.data.brands);
-    } catch (err) {
-      toast.error("Unable to fetch brands");
-      console.error(err);
-    } finally {
-      setLoadingFields(false);
-    }
-  };
+  const categories = categoriesData?.categories ?? [];
+  const brands = brandsData?.brands ?? [];
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
@@ -107,7 +67,7 @@ export function ProductForm({
     const formData = new FormData();
     formData.append("image", file);
 
-    setLoadingFields(true);
+    setIsUploadingImage(true);
 
     try {
       const response = await imageService.upload(formData);
@@ -122,14 +82,11 @@ export function ProductForm({
       console.error("Image upload failed", err);
       toast.error("Image upload failed. Please try again");
     } finally {
-      setLoadingFields(false);
+      setIsUploadingImage(false);
     }
   };
 
-  useEffect(() => {
-    fetchCategories();
-    fetchBrands();
-  }, []);
+  const isDataLoading = isLoadingCategories || isLoadingBrands;
 
   return (
     <Form {...form}>
@@ -190,7 +147,7 @@ export function ProductForm({
                     type="file"
                     accept="image/*"
                     onChange={handleImageUpload}
-                    disabled={loadingFields || isLoading}
+                    disabled={isUploadingImage || isLoading}
                   />
                 </div>
               </FormControl>
@@ -236,16 +193,15 @@ export function ProductForm({
                 <Select
                   value={field.value}
                   onValueChange={field.onChange}
-                  onOpenChange={(open) => open && fetchCategories()}
                 >
                   <SelectTrigger className="w-full">
-                    {!loadingFields ? (
+                    {!isLoadingCategories ? (
                       <SelectValue placeholder="Select a category" />
                     ) : (
                       <Loader2 className="animate-spin" />
                     )}
                   </SelectTrigger>
-                  {!loadingFields && categories.length && (
+                  {!isLoadingCategories && categories.length > 0 && (
                     <SelectContent>
                       {categories.map((item) => (
                         <SelectItem key={item.id} value={item.id}>
@@ -271,16 +227,15 @@ export function ProductForm({
                 <Select
                   value={field.value ?? "__none__"}
                   onValueChange={field.onChange}
-                  onOpenChange={(open) => open && fetchBrands()}
                 >
                   <SelectTrigger className="w-full">
-                    {!loadingFields ? (
+                    {!isLoadingBrands ? (
                       <SelectValue placeholder="Select a manufacturer" />
                     ) : (
                       <Loader2 className="animate-spin" />
                     )}
                   </SelectTrigger>
-                  {!loadingFields && brands.length && (
+                  {!isLoadingBrands && brands.length > 0 && (
                     <SelectContent>
                       <SelectItem value={"__none__"}>None</SelectItem>
                       {brands.map((item) => (
@@ -297,7 +252,7 @@ export function ProductForm({
           )}
         />
         <div className="flex justify-end space-x-2">
-          {!isLoading && !loadingFields ? (
+          {!isLoading && !isUploadingImage && !isDataLoading ? (
             <>
               <Button variant="outline" onClick={onCancel}>
                 Cancel
@@ -307,7 +262,11 @@ export function ProductForm({
           ) : (
             <Button variant="outline" disabled>
               <Loader2 className="animate-spin mr-2 h-4 w-4" />
-              {loadingFields ? "Loading fields..." : "Saving..."}
+              {isDataLoading
+                ? "Loading fields..."
+                : isUploadingImage
+                  ? "Uploading image..."
+                  : "Saving..."}
             </Button>
           )}
         </div>
