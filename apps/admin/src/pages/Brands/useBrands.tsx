@@ -6,7 +6,9 @@ import { UI_LABELS } from "@/lib/routes";
 
 import { brandFormSchema } from "./BrandForm";
 import pluralize from "pluralize";
-import { useDeleteState, useFormState, useTableState } from "./uiStates";
+import { useFormState } from "./useFormState";
+import { useDeleteState } from "@/hooks/useDeleteState";
+import { useTableState } from "@/hooks/useTableState";
 import {
   useCreateBrand,
   useRestoreBrand,
@@ -30,14 +32,6 @@ export function useBrands() {
     softDelete.isPending || hardDelete.isPending || restore.isPending;
 
   const isSubmitting = createBrand.isPending || updateBrand.isPending;
-
-  const toggleIncludeDeleted = (checked: boolean) => {
-    tableState.setIncludeDeleted(checked);
-    tableState.setColumnVisibility((prev) => ({
-      ...prev,
-      deletedAt: checked,
-    }));
-  };
 
   const openCreateForm = () => {
     formState.setBrand({
@@ -66,7 +60,7 @@ export function useBrands() {
       title: "Trash it?",
       description: "Wanna trash it? You can dig it back later.",
     });
-    deleteState.setSelectedBrandId(brandId);
+    deleteState.setSelectedId(brandId);
     deleteState.setDeleteMode("soft");
     deleteState.setOpenConfirmDialog(true);
   };
@@ -76,7 +70,7 @@ export function useBrands() {
       title: "Flatline this?",
       description: "You're reaching the point of no return.",
     });
-    deleteState.setSelectedBrandId(brandId);
+    deleteState.setSelectedId(brandId);
     deleteState.setDeleteMode("hard");
     deleteState.setOpenConfirmDialog(true);
   };
@@ -86,13 +80,13 @@ export function useBrands() {
       title: "Revive it?",
       description: "Bring it back to life?",
     });
-    deleteState.setSelectedBrandId(brandId);
+    deleteState.setSelectedId(brandId);
     deleteState.setDeleteMode("restore");
     deleteState.setOpenConfirmDialog(true);
   };
 
   const executeStaged = async () => {
-    const id = deleteState.selectedBrandId;
+    const id = deleteState.selectedId;
     const mode = deleteState.deleteMode;
 
     const verbMap = {
@@ -158,7 +152,6 @@ export function useBrands() {
     deleteState,
     isDeleting,
     isSubmitting,
-    toggleIncludeDeleted,
     openCreateForm,
     openEditForm,
     stageSoftDelete,

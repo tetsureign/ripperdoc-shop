@@ -23,7 +23,6 @@ export default function Brands() {
     deleteState,
     isDeleting,
     isSubmitting,
-    toggleIncludeDeleted,
     openCreateForm,
     openEditForm,
     stageSoftDelete,
@@ -63,7 +62,7 @@ export default function Brands() {
           <Switch
             id="include-deleted"
             disabled={isLoading}
-            onCheckedChange={toggleIncludeDeleted}
+            onCheckedChange={tableState.toggleIncludeDeleted}
           />
           <Label htmlFor="include-deleted">Include deleted</Label>
         </div>
