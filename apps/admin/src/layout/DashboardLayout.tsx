@@ -9,7 +9,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuthUser } from "@/hooks/useAuth";
 import { useLogout } from "@/hooks/useLogout";
 import { APP_ROUTES } from "@/lib/routes";
 import { Separator } from "@radix-ui/react-separator";
@@ -23,7 +23,7 @@ export default function DashboardLayout() {
 
   const logout = useLogout();
 
-  const { user, loading } = useAuth();
+  const { user, loading } = useAuthUser();
 
   if (loading) return <div>Scanning the Net...</div>;
 
