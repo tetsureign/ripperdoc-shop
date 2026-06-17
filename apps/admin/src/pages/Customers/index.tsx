@@ -1,5 +1,3 @@
-import { useEffect } from "react";
-
 import { DataTable } from "@/components/data-table";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
@@ -7,30 +5,25 @@ import { Switch } from "@/components/ui/switch";
 
 import { columns } from "./customersTableColumns";
 import { useCustomers } from "./useCustomers";
+import { useCustomersQuery } from "./network";
 
 export default function Customers() {
-  const { state, actions } = useCustomers();
-  const { table, error } = state;
+  const { tableState } = useCustomers();
 
-  useEffect(() => {
-    actions.fetchCustomers(
-      state.includeDeleted,
-      state.table.pageIndex + 1,
-      state.table.pageSize
-    );
-  }, [state.includeDeleted, state.table.pageIndex, state.table.pageSize]);
+  const {
+    data: customersData,
+    isLoading,
+    isError,
+  } = useCustomersQuery(
+    tableState.includeDeleted,
+    tableState.pageIndex + 1,
+    tableState.pageSize,
+  );
 
-  useEffect(() => {
-    table.setColumnVisibility((prev) => ({
-      ...prev,
-      deletedAt: state.includeDeleted,
-    }));
-  }, [state.includeDeleted]);
-
-  if (error) {
+  if (isError) {
     return (
       <Alert variant="destructive">
-        <AlertDescription>{error}</AlertDescription>
+        <AlertDescription>Failed to fetch customers</AlertDescription>
       </Alert>
     );
   }
@@ -41,11 +34,8 @@ export default function Customers() {
         <div className="flex items-center space-x-2">
           <Switch
             id="include-deleted"
-            disabled={table.tableLoading}
-            onCheckedChange={(checked) => {
-              if (checked) actions.setIncludeDeleted(true);
-              else actions.setIncludeDeleted(false);
-            }}
+            disabled={isLoading}
+            onCheckedChange={tableState.toggleIncludeDeleted}
           />
           <Label htmlFor="include-deleted">Include deleted</Label>
         </div>
@@ -53,15 +43,15 @@ export default function Customers() {
 
       <DataTable
         columns={columns}
-        data={table.data}
-        loading={table.tableLoading}
-        columnVisibility={table.columnVisibility}
-        setColumnVisibility={table.setColumnVisibility}
-        pageIndex={table.pageIndex}
-        pageSize={table.pageSize}
-        pageCount={table.pageCount}
-        onPageChange={table.setPageIndex}
-        onPageSizeChange={table.setPageSize}
+        data={customersData?.customers ?? []}
+        loading={isLoading}
+        columnVisibility={tableState.columnVisibility}
+        setColumnVisibility={tableState.setColumnVisibility}
+        pageIndex={tableState.pageIndex}
+        pageSize={tableState.pageSize}
+        pageCount={customersData?.totalPages ?? 0}
+        onPageChange={tableState.setPageIndex}
+        onPageSizeChange={tableState.setPageSize}
       />
     </div>
   );

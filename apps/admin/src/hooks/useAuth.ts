@@ -1,24 +1,42 @@
-import { useEffect, useState } from "react";
-import { authService, User } from "@/services/authService";
+import { authService } from "@/services/authService";
+import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-export const useAuth = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+export const useAuthUser = () => {
+  const query = useQuery({
+    queryKey: ["auth", "whoami"],
+    queryFn: () => authService.whoami().then((r) => r.data),
+    staleTime: Infinity,
+    refetchOnReconnect: false,
+    refetchOnWindowFocus: false,
+    retry: false, // don't retry on 401
+  });
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const res = await authService.whoami();
-        setUser(res.data);
-      } catch (err) {
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUser();
-  }, []);
-
-  return { user, loading };
+  return { user: query.data, loading: query.isLoading };
 };
+
+export function useAuthMutations() {
+  const queryClient = useQueryClient();
+
+  const loginMutation = useMutation({
+    mutationFn: ({ email, password }: { email: string; password: string }) =>
+      authService
+        .login({
+          email,
+          password,
+        })
+        .then((r) => r.data),
+    onSuccess: (userData) => {
+      queryClient.setQueryData(["auth"], userData);
+    },
+  });
+
+  const logoutMutation = useMutation({
+    mutationFn: async () => await authService.logout(),
+    onSuccess: () => {
+      queryClient.clear();
+    },
+  });
+
+  return { loginMutation, logoutMutation };
+}
