@@ -15,8 +15,10 @@ public class Order : ITimestampedEntity
     public Guid Id { get; private set; }
 
     private readonly List<OrderItem> _orderItems = [];
-
     public IReadOnlyList<OrderItem> OrderItems => _orderItems.AsReadOnly();
+    
+    private readonly List<IDomainEvent> _domainEvents = [];
+    public IReadOnlyList<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
 
     public decimal TotalPrice { get; private set; }
     public OrderStatus Status { get; private set; }
@@ -75,4 +77,7 @@ public class Order : ITimestampedEntity
         
         Status = OrderStatus.Completed;
     }
+    
+    public void ClearDomainEvents() => _domainEvents.Clear();
+    private void Raise(IDomainEvent domainEvent) => _domainEvents.Add(domainEvent);
 }
