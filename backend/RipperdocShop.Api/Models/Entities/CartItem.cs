@@ -1,4 +1,3 @@
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using RipperdocShop.Api.Models.Identities;
 
 namespace RipperdocShop.Api.Models.Entities;
@@ -19,7 +18,7 @@ public class CartItem
     {
     }
 
-    public void Add(Product product, AppUser user, int quantity)
+    public CartItem(Product product, AppUser user, int quantity)
     {
         if (quantity <= 0)
             throw new ArgumentOutOfRangeException(nameof(quantity),

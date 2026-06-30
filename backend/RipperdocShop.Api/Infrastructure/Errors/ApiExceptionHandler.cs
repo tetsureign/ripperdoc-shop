@@ -13,6 +13,7 @@ public class ApiExceptionHandler(ILogger<ApiExceptionHandler> logger) : IExcepti
     {
         var (statusCode, title) = exception switch
         {
+            DomainException domain => (domain.StatusCode, "Domain error"),
             ArgumentOutOfRangeException => (StatusCodes.Status400BadRequest, "Invalid request"),
             ArgumentException => (StatusCodes.Status400BadRequest, "Invalid request"),
             InvalidOperationException => (StatusCodes.Status400BadRequest, "Invalid operation"),

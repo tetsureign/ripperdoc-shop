@@ -27,6 +27,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="Modules\Orders\Errors\" />
       <Folder Include="wwwroot\" />
     </ItemGroup>
 
