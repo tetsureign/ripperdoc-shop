@@ -20,13 +20,13 @@ Tactical DDD applied to the e-com Orders flow.
 ## Week Plan
 
 ### Day 1-2: Domain Layer
-- [ ] Redesign `Order.cs` as a proper aggregate root
+- [x] Redesign `Order.cs` as a proper aggregate root
   - Private `List<OrderItem>` collection
   - `Order.Place(cartItems)` — validates cart non-empty, computes total, populates items
   - `Order.Cancel()` — guard: only if `Pending`
   - `Order.Ship()` — guard: only if `Pending`
   - `Order.Complete()` — guard: only if `Shipping`
-- [ ] `OrderItem` — no public constructor, only creatable via `Order`
+- [x] `OrderItem` — no public constructor, only creatable via `Order`
 - [ ] Typed error hierarchy: `OrderNotFoundError`, `OrderAlreadyCancelledError`, `InvalidOrderTransitionError`
 - [ ] Domain events as simple records on the aggregate (inspectable in tests, no event bus needed yet)
 
