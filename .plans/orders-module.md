@@ -27,17 +27,18 @@ Tactical DDD applied to the e-com Orders flow.
   - `Order.Ship()` — guard: only if `Pending`
   - `Order.Complete()` — guard: only if `Shipping`
 - [x] `OrderItem` — no public constructor, only creatable via `Order`
-- [ ] Typed error hierarchy: `OrderNotFoundException`, `InvalidOrderTransitionException` — see **Error Handling** section
-- [ ] Domain events as simple records on the aggregate (inspectable in tests, no event bus needed yet) — see **Domain Events** section
+- [x] Typed error hierarchy: `OrderNotFoundException`, `InvalidOrderTransitionException` — see **Error Handling** section
+- [x] Domain events as simple records on the aggregate (inspectable in tests, no event bus needed yet) — see **Domain Events** section
 
 ### Day 3: Application Layer
-- [ ] `PlaceOrderCommand` — atomic: validate cart, create order from cart items, clear cart
-- [ ] `CancelOrderCommand` — customer-facing, only if `Pending`
-- [ ] `UpdateOrderStatusCommand` — admin: `Ship`, `Complete`
-- [ ] `ListMyOrdersQuery` — customer's own orders
-- [ ] `GetOrderDetailsQuery` — order + items
-- [ ] `ListAdminOrdersQuery` — with status filter + pagination
-- [ ] Register all handlers in `AppModulesServiceCollectionExtensions.cs`
+- [x] `PlaceOrderCommand` — atomic: validate cart, create order from cart items, clear cart
+- [x] `CancelOrderCommand` — customer-facing, only if `Pending`
+- [x] `ShipOrderCommand` — admin only, `order.Ship()`
+- [x] `CompleteOrderCommand` — admin only, `order.Complete()`
+- [x] `ListMyOrdersQuery` — customer's own orders
+- [x] `GetOrderDetailsQuery` — order + items
+- [x] `ListAdminOrdersQuery` — with status filter + pagination
+- [x] Register all handlers in `AppModulesServiceCollectionExtensions.cs`
 
 ### Day 4: API + Tests
 - [ ] `OrdersController` — customer routes + admin routes
