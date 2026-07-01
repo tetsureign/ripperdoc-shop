@@ -27,8 +27,8 @@ Tactical DDD applied to the e-com Orders flow.
   - `Order.Ship()` — guard: only if `Pending`
   - `Order.Complete()` — guard: only if `Shipping`
 - [x] `OrderItem` — no public constructor, only creatable via `Order`
-- [ ] Typed error hierarchy: `OrderNotFoundError`, `OrderAlreadyCancelledError`, `InvalidOrderTransitionError`
-- [ ] Domain events as simple records on the aggregate (inspectable in tests, no event bus needed yet)
+- [ ] Typed error hierarchy: `OrderNotFoundException`, `InvalidOrderTransitionException` — see **Error Handling** section
+- [ ] Domain events as simple records on the aggregate (inspectable in tests, no event bus needed yet) — see **Domain Events** section
 
 ### Day 3: Application Layer
 - [ ] `PlaceOrderCommand` — atomic: validate cart, create order from cart items, clear cart
@@ -57,6 +57,83 @@ Tactical DDD applied to the e-com Orders flow.
 
 ---
 
+## Error Handling
+
+Mental model: **typed exceptions** are for when the only handler is the HTTP layer mapping to a status code. **Result pattern** is for when other business logic inside the app needs to branch on the failure.
+
+Orders only needs typed exceptions — nothing inside the app branches on order failures, the HTTP layer just maps them to status codes.
+
+**Base class** (`Infrastructure/Errors/DomainException.cs`):
+```csharp
+public abstract class DomainException(string message, int statusCode) : Exception(message)
+{
+    public int StatusCode { get; } = statusCode;
+}
+```
+
+**Order-specific exceptions** (`Modules/Orders/Errors/`):
+```csharp
+public class OrderNotFoundException(Guid id)
+    : DomainException($"Order {id} not found.", StatusCodes.Status404NotFound);
+
+public class InvalidOrderTransitionException(OrderStatus from, OrderStatus to)
+    : DomainException($"Cannot transition order from {from} to {to}.", StatusCodes.Status409Conflict);
+```
+
+**Update `ApiExceptionHandler`** to match on `DomainException` first:
+```csharp
+var (statusCode, title) = exception switch
+{
+    DomainException domain => (domain.StatusCode, "Domain error"),
+    ArgumentException      => (StatusCodes.Status400BadRequest, "Invalid request"),
+    _                      => (StatusCodes.Status500InternalServerError, "Unexpected error")
+};
+```
+
+New exceptions are picked up automatically — the handler never needs to know about specific types.
+
+> **Convention:** errors live in `Modules/Orders/Errors/`, co-located with the use cases that throw them (same as obsync's `vault/errors/`).
+
+---
+
+## Domain Events
+
+No MediatR, no event bus — collect on the aggregate, dispatch after `SaveChangesAsync`.
+
+**Interface** (`Models/IDomainEvent.cs`):
+```csharp
+public interface IDomainEvent { }
+```
+
+**On the aggregate** (`Order.cs`):
+```csharp
+private readonly List<IDomainEvent> _domainEvents = [];
+public IReadOnlyList<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
+public void ClearDomainEvents() => _domainEvents.Clear();
+private void Raise(IDomainEvent e) => _domainEvents.Add(e);
+```
+
+**Events to raise** (`Modules/Orders/Events/`):
+
+| Method | Event | Payload |
+|---|---|---|
+| `Place()` | `OrderPlacedEvent` | `OrderId, UserId, Total` |
+| `Cancel()` | `OrderCancelledEvent` | `OrderId, UserId` |
+| `Ship()` | `OrderShippedEvent` | `OrderId` |
+| `Complete()` | `OrderCompletedEvent` | `OrderId` |
+
+**Dispatch in the command** (after save):
+```csharp
+var events = order.DomainEvents.ToList();
+order.ClearDomainEvents();
+// for now: log each event
+// later: hand off to a real dispatcher
+```
+
+Value today: **tests can assert events were raised** by inspecting `order.DomainEvents`. Easy to upgrade to a real dispatcher later without touching the domain.
+
+---
+
 ## Interview Story
 
 > "Orders was the hardest part to model. I used an aggregate root to enforce that order items can only be mutated through the order itself. The `Order.Place()` method validates the cart isn't empty, computes the total atomically, and raises a domain event. State transitions are guarded — you can't cancel a completed order, you can't ship a cancelled one. The checkout is a single EF transaction."
@@ -66,5 +143,5 @@ Tactical DDD applied to the e-com Orders flow.
 ## Patterns to Reuse from Obsync
 
 - Step transition guards (`startStepOrThrow`) -> `Order` status transition guards
-- Typed error hierarchy -> `OrderNotFoundError`, `InvalidOrderTransitionError`
+- Typed error hierarchy -> `OrderNotFoundException`, `InvalidOrderTransitionException`
 - Best-effort persistence pattern -> if a notification fails post-order, don't roll back the order
