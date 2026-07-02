@@ -17,6 +17,7 @@ public class ApiExceptionHandler(ILogger<ApiExceptionHandler> logger) : IExcepti
             ArgumentOutOfRangeException => (StatusCodes.Status400BadRequest, "Invalid request"),
             ArgumentException => (StatusCodes.Status400BadRequest, "Invalid request"),
             InvalidOperationException => (StatusCodes.Status400BadRequest, "Invalid operation"),
+            UnauthorizedAccessException => (StatusCodes.Status403Forbidden, "Forbidden"),
             _ => (StatusCodes.Status500InternalServerError, "Unexpected error")
         };
 

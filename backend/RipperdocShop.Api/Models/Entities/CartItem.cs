@@ -18,7 +18,7 @@ public class CartItem
     {
     }
 
-    public CartItem(Product product, AppUser user, int quantity)
+    public CartItem(Product product, Guid userId, int quantity)
     {
         if (quantity <= 0)
             throw new ArgumentOutOfRangeException(nameof(quantity),
@@ -29,8 +29,7 @@ public class CartItem
         CreatedAt = DateTime.UtcNow;
         Product = product;
         ProductId = product.Id;
-        User = user;
-        UserId = user.Id;
+        UserId = userId;
     }
 
     public void UpdateQuantity(int quantity)

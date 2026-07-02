@@ -3,6 +3,8 @@ using RipperdocShop.Api.Modules.Auth.Commands;
 using RipperdocShop.Api.Modules.Auth.Queries;
 using RipperdocShop.Api.Modules.Brands.Commands;
 using RipperdocShop.Api.Modules.Brands.Queries;
+using RipperdocShop.Api.Modules.Carts.Commands;
+using RipperdocShop.Api.Modules.Carts.Queries;
 using RipperdocShop.Api.Modules.Categories.Commands;
 using RipperdocShop.Api.Modules.Categories.Queries;
 using RipperdocShop.Api.Modules.Customers.Queries;
@@ -85,6 +87,11 @@ public static class AppModulesServiceCollectionExtensions
         services.AddScoped<ListMyOrdersQuery>();
         services.AddScoped<GetMyOrderDetailsQuery>();
         services.AddScoped<CancelMyOrderCommand>();
+
+        services.AddScoped<UpsertCartItemCommand>();
+        services.AddScoped<RemoveFromCartCommand>();
+        services.AddScoped<UpdateCartItemCommand>();
+        services.AddScoped<GetMyCartQuery>();
 
         return services;
     }
