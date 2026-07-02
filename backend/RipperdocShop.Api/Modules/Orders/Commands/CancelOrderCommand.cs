@@ -4,9 +4,9 @@ using RipperdocShop.Api.Modules.Orders.Errors;
 
 namespace RipperdocShop.Api.Modules.Orders.Commands;
 
-public class CancelOrderCommand(ApplicationDbContext dbContext, Logger<CancelOrderCommand> logger)
+public class CancelOrderCommand(ApplicationDbContext dbContext, ILogger<CancelOrderCommand> logger)
 {
-    public async Task<Order?> ExecuteAsync(Guid id)
+    public async Task<Order> ExecuteAsync(Guid id)
     {
         var order = await dbContext.Orders.FindAsync(id);
         
@@ -19,8 +19,7 @@ public class CancelOrderCommand(ApplicationDbContext dbContext, Logger<CancelOrd
         order.ClearDomainEvents();
         
         foreach (var e in events)
-            logger.LogInformation("Domain event raised: {Event}", e. 
-                GetType().Name);
+            logger.LogInformation("Domain event raised: {Event}", e.GetType().Name);
         
         return order;
     }

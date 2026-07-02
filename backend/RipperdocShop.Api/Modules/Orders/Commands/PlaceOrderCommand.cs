@@ -6,9 +6,9 @@ using RipperdocShop.Shared.DTOs.Orders;
 
 namespace RipperdocShop.Api.Modules.Orders.Commands;
 
-public class PlaceOrderCommand(ApplicationDbContext dbContext)
+public class PlaceOrderCommand(ApplicationDbContext dbContext, ILogger<PlaceOrderCommand> logger)
 {
-    public async Task<Order?> ExecuteAsync(Guid userId, OrderCreateDto order, Logger<PlaceOrderCommand> logger)
+    public async Task<Order> ExecuteAsync(Guid userId, OrderCreateDto order)
     {
         var cartItems = await dbContext.CartItems
             .Where(ci => ci.UserId == userId)

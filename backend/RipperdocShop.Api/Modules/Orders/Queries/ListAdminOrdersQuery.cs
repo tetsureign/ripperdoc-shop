@@ -15,7 +15,7 @@ public class AdminOrderFilter
 
 public class ListAdminOrdersQuery(ApplicationDbContext dbContext)
 {
-    public async Task<AdminOrderResponse?> ExecuteAsync(AdminOrderFilter filter)
+    public async Task<AdminOrderResponse> ExecuteAsync(AdminOrderFilter filter)
     {
         var query = dbContext.Orders
             .Where(o => filter.Status == null || o.Status == filter.Status)

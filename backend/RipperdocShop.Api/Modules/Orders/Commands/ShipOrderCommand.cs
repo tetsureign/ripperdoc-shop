@@ -4,9 +4,9 @@ using RipperdocShop.Api.Modules.Orders.Errors;
 
 namespace RipperdocShop.Api.Modules.Orders.Commands;
 
-public class ShipOrderCommand(ApplicationDbContext dbContext, Logger<ShipOrderCommand> logger)
+public class ShipOrderCommand(ApplicationDbContext dbContext, ILogger<ShipOrderCommand> logger)
 {
-    public async Task<Order?> ExecuteAsync(Guid id)
+    public async Task<Order> ExecuteAsync(Guid id)
     {
         var order = await dbContext.Orders.FindAsync(id);
 

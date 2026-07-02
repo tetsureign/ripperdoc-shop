@@ -41,7 +41,7 @@ Tactical DDD applied to the e-com Orders flow.
 - [x] Register all handlers in `AppModulesServiceCollectionExtensions.cs`
 
 ### Day 4: API + Tests
-- [ ] `OrdersController` — customer routes + admin routes
+- [x] `OrdersController` — customer routes + admin routes
 - [ ] Unit tests for aggregate state machine transitions
 - [ ] Integration test for full `PlaceOrder` flow (add to cart -> checkout -> order exists, cart cleared)
 - [ ] Add `dotnet test` step to `.github/workflows/publish-ghcr.yml`

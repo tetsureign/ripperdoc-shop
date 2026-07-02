@@ -83,6 +83,8 @@ public static class AppModulesServiceCollectionExtensions
         services.AddScoped<GetOrderDetailsQuery>();
         services.AddScoped<ListAdminOrdersQuery>();
         services.AddScoped<ListMyOrdersQuery>();
+        services.AddScoped<GetMyOrderDetailsQuery>();
+        services.AddScoped<CancelMyOrderCommand>();
 
         return services;
     }
