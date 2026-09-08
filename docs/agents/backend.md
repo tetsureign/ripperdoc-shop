@@ -9,6 +9,35 @@ The backend consists of three projects targeting .NET 8:
 - `RipperdocShop.Shared`: Cross-cutting DTOs and request/response contracts consumed by API and frontends.
 - `RipperdocShop.Tests`: Unit and integration test suite using xUnit and EF Core InMemory.
 
+## Local Development & Infrastructure
+
+When developing locally, run PostgreSQL via Docker/Podman and run the .NET API directly on the host with `dotnet run`. Do not run the API container in Docker during local dev.
+
+### 1. Database (PostgreSQL)
+Start the PostgreSQL container from `compose.yaml`:
+```bash
+docker compose up -d postgres
+# or using podman:
+podman compose up -d postgres
+```
+- **Port**: `5432`
+- **Default credentials** (from `appsettings.Development.json`): User `admin`, Password `password123`, Database `ripperdoc_shop`.
+
+### 2. Running the API
+Run the Web API using the `http` launch profile (listens on `http://localhost:5133`):
+```bash
+dotnet run --project backend/RipperdocShop.Api --launch-profile http
+```
+- **Automatic Migrations & Seeding**: `Program.cs` automatically executes `context.Database.MigrateAsync()` and seeds default roles and the initial admin user on boot.
+- **Swagger UI**: Accessible at `http://localhost:5133/swagger` when running in `Development`.
+- **Health Check**: `GET http://localhost:5133/health` returns `"Healthy"`.
+
+### 3. Running Tests
+Run the xUnit test suite:
+```bash
+dotnet test backend/RipperdocShop.sln
+```
+
 ## Tiered Domain Modeling
 
 Apply architecture according to entity lifecycle complexity:
