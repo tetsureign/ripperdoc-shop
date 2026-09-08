@@ -11,6 +11,9 @@ public class GetMyCartQuery(ApplicationDbContext dbContext)
     {
         var myCart = await dbContext.CartItems
             .Include(x => x.Product)
+            .ThenInclude(x => x.Category)
+            .Include(x => x.Product)
+            .ThenInclude(x => x.Brand)
             .Where(x => x.UserId == userId)
             .ToListAsync();
         

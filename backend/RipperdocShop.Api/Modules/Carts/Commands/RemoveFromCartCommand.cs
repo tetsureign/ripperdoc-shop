@@ -8,7 +8,7 @@ public class RemoveFromCartCommand(ApplicationDbContext dbContext)
 {
     public async Task ExecuteAsync(Guid id, Guid userId)
     {
-        var item = await dbContext.CartItems .FindAsync(id);
+        var item = await dbContext.CartItems.FindAsync(id);
         if (item == null) throw new CartItemNotFoundException(id);
         
         if (item.UserId != userId) throw new UnauthorizedAccessException("Choom, no touching other chooms' biz");

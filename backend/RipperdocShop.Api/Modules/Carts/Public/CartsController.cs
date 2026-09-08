@@ -22,7 +22,7 @@ public class CartsController(
 
     [HttpPost]
     public async Task<IActionResult> AddItem([FromBody] CartCreateDto dto)
-        => Ok(await upsertCartItem.ExecuteAsync(dto.ProductId, GetUserId(), dto.Quantity));
+        => Ok(await upsertCartItem.ExecuteAsync(dto.ProductSlug, GetUserId(), dto.Quantity));
 
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> RemoveItem(Guid id)
