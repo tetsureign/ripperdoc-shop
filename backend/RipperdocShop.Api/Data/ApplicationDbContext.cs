@@ -122,20 +122,16 @@ public class ApplicationDbContext(
             e.Property(o => o.Status).IsRequired();
             e.Property(o => o.TotalPrice).HasColumnType("decimal(18,2)");
 
-            e.HasOne(r => r.User)
+            e.HasOne(o => o.User)
                 .WithMany()
                 .HasForeignKey(o => o.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.SetNull);
         });
 
         builder.Entity<OrderItem>(e =>
         {
             e.HasKey(oi => oi.Id);
             e.Property(oi => oi.Quantity).IsRequired();
-
-            e.HasOne(oi => oi.Order)
-                .WithMany()
-                .HasForeignKey(oi => oi.OrderId);
 
             e.HasOne(oi => oi.Product)
                 .WithMany()

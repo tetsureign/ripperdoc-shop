@@ -3,10 +3,14 @@ using RipperdocShop.Api.Modules.Auth.Commands;
 using RipperdocShop.Api.Modules.Auth.Queries;
 using RipperdocShop.Api.Modules.Brands.Commands;
 using RipperdocShop.Api.Modules.Brands.Queries;
+using RipperdocShop.Api.Modules.Carts.Commands;
+using RipperdocShop.Api.Modules.Carts.Queries;
 using RipperdocShop.Api.Modules.Categories.Commands;
 using RipperdocShop.Api.Modules.Categories.Queries;
 using RipperdocShop.Api.Modules.Customers.Queries;
 using RipperdocShop.Api.Modules.Images.Commands;
+using RipperdocShop.Api.Modules.Orders.Commands;
+using RipperdocShop.Api.Modules.Orders.Queries;
 using RipperdocShop.Api.Modules.Products.Commands;
 using RipperdocShop.Api.Modules.Products.Queries;
 using RipperdocShop.Api.Modules.Ratings.Commands;
@@ -73,6 +77,21 @@ public static class AppModulesServiceCollectionExtensions
         services.AddScoped<ListProductRatingsByProductSlugQuery>();
         services.AddScoped<ListAdminProductRatingsByProductQuery>();
         services.AddScoped<ListAdminProductRatingsByUserQuery>();
+
+        services.AddScoped<CancelOrderCommand>();
+        services.AddScoped<CompleteOrderCommand>();
+        services.AddScoped<PlaceOrderCommand>();
+        services.AddScoped<ShipOrderCommand>();
+        services.AddScoped<GetOrderDetailsQuery>();
+        services.AddScoped<ListAdminOrdersQuery>();
+        services.AddScoped<ListMyOrdersQuery>();
+        services.AddScoped<GetMyOrderDetailsQuery>();
+        services.AddScoped<CancelMyOrderCommand>();
+
+        services.AddScoped<UpsertCartItemCommand>();
+        services.AddScoped<RemoveFromCartCommand>();
+        services.AddScoped<UpdateCartItemCommand>();
+        services.AddScoped<GetMyCartQuery>();
 
         return services;
     }
