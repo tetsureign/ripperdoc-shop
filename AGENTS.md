@@ -6,6 +6,7 @@ Repository rules and operational reference for `RipperdocShop`.
 
 - **Backend**: Consult [`docs/agents/backend.md`](docs/agents/backend.md) when writing C#, modifying EF Core entities, creating migrations, altering shared DTO contracts, or adding backend tests.
 - **Frontend**: Consult [`docs/agents/frontend.md`](docs/agents/frontend.md) when working in `apps/admin` or `apps/customer`, modifying build configs, or updating client API integrations.
+- **Sprint Roadmap**: Consult [`.plans/portfolio-mvp-roadmap.md`](.plans/portfolio-mvp-roadmap.md) when planning or working on portfolio sprint milestones, testing gaps, and architectural improvements.
 
 ## Repository Layout
 
