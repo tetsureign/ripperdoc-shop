@@ -10,6 +10,7 @@ public class GetMyCartQuery(ApplicationDbContext dbContext)
     public async Task<IEnumerable<CartItemDto>> ExecuteAsync(Guid userId)
     {
         var myCart = await dbContext.CartItems
+            .Include(x => x.Product)
             .Where(x => x.UserId == userId)
             .ToListAsync();
         
