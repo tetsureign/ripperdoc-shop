@@ -14,6 +14,8 @@ public class PlaceOrderCommand(ApplicationDbContext dbContext, ILogger<PlaceOrde
             .Where(ci => ci.UserId == userId)
             .Include(ci => ci.Product)
             .ThenInclude(p => p.Category)
+            .Include(ci => ci.Product)
+            .ThenInclude(p => p.Brand)
             .ToListAsync();
 
         if (cartItems.Count == 0) throw new EmptyCartException(userId);
