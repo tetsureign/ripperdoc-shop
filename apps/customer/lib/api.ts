@@ -1,9 +1,9 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
 function apiBase() {
-  // Use Next.js rewrite proxy when no env is set
-  if (API_URL) return API_URL;
-  return "";
+  // In the browser, always use relative path to go through Next.js proxy rewrites
+  if (typeof window !== "undefined") return "";
+  return API_URL || "http://localhost:5133";
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
