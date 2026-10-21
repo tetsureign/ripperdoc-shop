@@ -10,8 +10,8 @@ namespace RipperdocShop.Api.Data;
 public class ApplicationDbContext(
     DbContextOptions<ApplicationDbContext> options,
     TimestampInterceptor timestampInterceptor)
-    : IdentityDbContext<AppUser, AppRole, Guid, 
-        IdentityUserClaim<Guid>, AppUserRole, IdentityUserLogin<Guid>, 
+    : IdentityDbContext<AppUser, AppRole, Guid,
+        IdentityUserClaim<Guid>, AppUserRole, IdentityUserLogin<Guid>,
         IdentityRoleClaim<Guid>, IdentityUserToken<Guid>>(options)
 {
     public DbSet<Category> Categories { get; set; }
@@ -96,11 +96,8 @@ public class ApplicationDbContext(
             e.HasKey(r => r.Id);
             e.Property(r => r.Score).IsRequired();
             e.Property(r => r.Comment).HasMaxLength(3000);
-            
-            e.HasCheckConstraint(
-                "CK_ProductRatings_Score_Range",
-                "score >= 1 AND score <= 5"
-            );
+
+            e.ToTable(t => t.HasCheckConstraint("CK_ProductRatings_Score_Range", "score >= 1 AND score <= 5"));
 
             e.HasIndex(r => new { r.ProductId, r.UserId })
                 .IsUnique();

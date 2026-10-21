@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using RipperdocShop.Api.Data;
 using RipperdocShop.Api.Infrastructure.Errors;
 using RipperdocShop.Api.Interceptors;
@@ -17,7 +17,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-    options.KnownNetworks.Clear();
+    options.KnownIPNetworks.Clear();
     options.KnownProxies.Clear();
 });
 
@@ -64,7 +64,7 @@ builder.Services.AddControllers();
 builder.Services.AddAuthentication()
      .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
      {
-         if (builder.Environment.IsDevelopment()) 
+         if (builder.Environment.IsDevelopment())
              options.RequireHttpsMetadata = false;
          options.SaveToken = true;
          options.TokenValidationParameters = new TokenValidationParameters
@@ -102,19 +102,16 @@ builder.Services.AddSwaggerGen(options =>
         Scheme = "Bearer",
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
-        Description = "Put only your JWT Bearer token here.",
-        
-        Reference = new OpenApiReference
-        {
-            Id = JwtBearerDefaults.AuthenticationScheme,
-            Type = ReferenceType.SecurityScheme
-        }
+        Description = "Put only your JWT Bearer token here."
     };
-    
-    options.AddSecurityDefinition(jwtScheme.Reference.Id, jwtScheme);
-    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+
+    options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, jwtScheme);
+    options.AddSecurityRequirement(doc => new OpenApiSecurityRequirement
     {
-        {jwtScheme,  [] }
+        {
+            new OpenApiSecuritySchemeReference(JwtBearerDefaults.AuthenticationScheme, doc),
+            []
+        }
     });
 });
 
@@ -176,7 +173,7 @@ using (var scope = app.Services.CreateScope())
         {
             throw new Exception("Admin:Email or Admin:Password is not set. Please set them in the appsettings.json file or in the environment variables ADMIN_EMAIL and ADMIN_PASSWORD.");
         }
-        await IdentitySeeder.SeedAsync(services, adminEmail, adminPassword);;
+        await IdentitySeeder.SeedAsync(services, adminEmail, adminPassword);
         logger.LogInformation("Identity seeding complete.");
     }
     catch (Exception ex)
