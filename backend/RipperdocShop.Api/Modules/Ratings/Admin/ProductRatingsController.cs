@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 using RipperdocShop.Api.Modules.Ratings.Commands;
 using RipperdocShop.Api.Modules.Ratings.Queries;
 
@@ -22,7 +21,7 @@ public class ProductRatingsController(
     {
         var response = await listRatingsByProduct.ExecuteAsync(productId, includeDeleted, page, pageSize);
 
-        return response.Ratings.IsNullOrEmpty() ? NotFound(new ProblemDetails
+        return !response.Ratings.Any() ? NotFound(new ProblemDetails
         {
             Status = StatusCodes.Status404NotFound,
             Title = "Product not found",
@@ -35,7 +34,7 @@ public class ProductRatingsController(
     {
         var response = await listRatingsByUser.ExecuteAsync(userId, includeDeleted, page, pageSize);
 
-        return response.Ratings.IsNullOrEmpty() ? NotFound(new ProblemDetails
+        return !response.Ratings.Any() ? NotFound(new ProblemDetails
         {
             Status = StatusCodes.Status404NotFound,
             Title = "Product not found",
@@ -51,12 +50,14 @@ public class ProductRatingsController(
     {
         var product = await softDeleteRating.ExecuteAsync(id);
         if (product == null)
+        {
             return NotFound(new ProblemDetails
             {
                 Status = StatusCodes.Status404NotFound,
                 Title = "Resource not found",
                 Detail = $"Rating with ID {id} does not exist"
             });
+        }
 
         return NoContent();
     }
@@ -69,12 +70,14 @@ public class ProductRatingsController(
     {
         var product = await restoreRating.ExecuteAsync(id);
         if (product == null)
+        {
             return NotFound(new ProblemDetails
             {
                 Status = StatusCodes.Status404NotFound,
                 Title = "Resource not found",
                 Detail = $"Rating with ID {id} does not exist"
             });
+        }
 
         return NoContent();
     }
