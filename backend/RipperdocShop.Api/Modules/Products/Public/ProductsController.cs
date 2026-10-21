@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 using RipperdocShop.Api.Modules.Products.Queries;
 
 namespace RipperdocShop.Api.Modules.Products.Public;
@@ -53,7 +52,7 @@ public class ProductsController(
     public async Task<IActionResult> GetFeatured()
     {
         var products = await listFeaturedProducts.ExecuteAsync();
-        return products.IsNullOrEmpty()
+        return !products.Any()
             ? NotFound(new ProblemDetails
             {
                 Status = StatusCodes.Status404NotFound,
