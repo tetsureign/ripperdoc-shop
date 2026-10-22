@@ -11,6 +11,7 @@ type CartState = {
   add: (productSlug: string, qty: number) => Promise<void>;
   remove: (id: string) => Promise<void>;
   updateQty: (id: string, qty: number) => Promise<void>;
+  clear: () => void;
 };
 
 export const useCartStore = create<CartState>((set, get) => ({
@@ -36,6 +37,9 @@ export const useCartStore = create<CartState>((set, get) => ({
   updateQty: async (id, qty) => {
     await api.post(`/api/carts/${id}/quantity`, qty);
     await get().refresh();
+  },
+  clear: () => {
+    set({ items: [], loading: false });
   },
 }));
 

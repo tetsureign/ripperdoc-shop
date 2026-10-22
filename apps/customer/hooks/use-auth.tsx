@@ -1,6 +1,7 @@
 "use client";
 import { create } from "zustand";
 import { api } from "@/lib/api";
+import { useCartStore } from "@/hooks/use-cart";
 import type { WhoAmIDto } from "@/lib/types";
 
 type AuthState = {
@@ -27,14 +28,17 @@ export const useAuthStore = create<AuthState>((set) => ({
     await api.post("/api/auth/login", { email, password });
     const u = await api.get<WhoAmIDto>("/api/auth/whoami").catch(() => null);
     set({ user: u });
+    await useCartStore.getState().refresh();
   },
   register: async (email, password) => {
     await api.post("/api/auth/register", { email, password });
     const u = await api.get<WhoAmIDto>("/api/auth/whoami").catch(() => null);
     set({ user: u });
+    await useCartStore.getState().refresh();
   },
   logout: async () => {
     await api.post("/api/auth/logout");
     set({ user: null });
+    useCartStore.getState().clear();
   },
 }));
