@@ -12,6 +12,7 @@ public class ListProductRatingsByProductSlugQuery(ApplicationDbContext context)
         int pageSize)
     {
         var query = context.ProductRatings
+            .AsNoTracking()
             .Include(r => r.User)
             .Include(r => r.Product)
             .Where(r => r.Product.Slug == slug)

@@ -11,6 +11,7 @@ public class ListProductsByBrandSlugQuery(ApplicationDbContext context)
     public async Task<PaginatedProductResponse> ExecuteAsync(string slug, bool includeDeleted, int page, int pageSize)
     {
         var query = context.Products
+            .AsNoTracking()
             .Include(p => p.Category)
             .Include(p => p.Brand)
             .Where(p =>

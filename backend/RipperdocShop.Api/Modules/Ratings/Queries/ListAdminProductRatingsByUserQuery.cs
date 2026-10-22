@@ -9,6 +9,7 @@ public class ListAdminProductRatingsByUserQuery(ApplicationDbContext context)
     public async Task<AdminProductRatingResponse> ExecuteAsync(Guid userId, bool includeDeleted, int page, int pageSize)
     {
         var query = context.ProductRatings
+            .AsNoTracking()
             .Include(r => r.Product)
             .Where(r => r.UserId == userId)
             .Where(r => includeDeleted || r.DeletedAt == null);

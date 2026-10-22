@@ -18,6 +18,7 @@ public class ListAdminOrdersQuery(ApplicationDbContext dbContext)
     public async Task<AdminOrderResponse> ExecuteAsync(AdminOrderFilter filter)
     {
         var query = dbContext.Orders
+            .AsNoTracking()
             .Where(o => filter.Status == null || o.Status == filter.Status)
             .Where(o => filter.UserId == null || o.UserId == filter.UserId);
 

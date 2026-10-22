@@ -10,6 +10,7 @@ public class GetBrandBySlugQuery(ApplicationDbContext context)
     public async Task<BrandDto?> ExecuteAsync(string slug)
     {
         var brand = await context.Brands
+            .AsNoTracking()
             .FirstOrDefaultAsync(b => b.Slug == slug);
 
         return brand.ToDto();

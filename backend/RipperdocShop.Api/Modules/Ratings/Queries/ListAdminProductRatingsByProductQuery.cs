@@ -10,6 +10,7 @@ public class ListAdminProductRatingsByProductQuery(ApplicationDbContext context)
         int pageSize)
     {
         var query = context.ProductRatings
+            .AsNoTracking()
             .Include(r => r.User)
             .Where(r => r.ProductId == productId)
             .Where(r => includeDeleted || r.DeletedAt == null);
