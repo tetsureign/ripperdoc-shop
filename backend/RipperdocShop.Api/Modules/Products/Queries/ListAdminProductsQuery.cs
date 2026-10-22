@@ -9,6 +9,7 @@ public class ListAdminProductsQuery(ApplicationDbContext context)
     public async Task<AdminProductResponse> ExecuteAsync(bool includeDeleted, int page, int pageSize)
     {
         var query = context.Products
+            .AsNoTracking()
             .Include(p => p.Category)
             .Include(p => p.Brand)
             .Where(p =>

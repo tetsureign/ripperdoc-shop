@@ -11,6 +11,7 @@ public class GetCategoryBySlugQuery(ApplicationDbContext context)
     public async Task<CategoryDto?> ExecuteAsync(string slug)
     {
         var category = await context.Categories
+            .AsNoTracking()
             .FirstOrDefaultAsync(c => c.Slug == slug);
 
         return category.ToDto();

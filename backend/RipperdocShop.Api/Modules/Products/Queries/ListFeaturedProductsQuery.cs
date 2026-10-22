@@ -11,6 +11,7 @@ public class ListFeaturedProductsQuery(ApplicationDbContext context)
     public async Task<IEnumerable<ProductDto>> ExecuteAsync()
     {
         var products = await context.Products
+            .AsNoTracking()
             .Include(p => p.Category)
             .Include(p => p.Brand)
             .Where(p => p.IsFeatured && p.DeletedAt == null)

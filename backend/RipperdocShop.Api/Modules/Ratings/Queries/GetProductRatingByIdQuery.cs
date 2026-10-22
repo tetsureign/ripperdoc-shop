@@ -11,6 +11,7 @@ public class GetProductRatingByIdQuery(ApplicationDbContext context)
     public async Task<ProductRatingDto?> ExecuteAsync(Guid id)
     {
         var rating = await context.ProductRatings
+            .AsNoTracking()
             .Include(r => r.Product)
             .Include(r => r.User)
             .FirstOrDefaultAsync(r => r.Id == id);

@@ -11,6 +11,7 @@ public class ListAdminCustomersQuery(ApplicationDbContext context)
     public async Task<AdminCustomerListResponse> ExecuteAsync(bool includeDeleted, int page, int pageSize)
     {
         var query = context.Users
+            .AsNoTracking()
             .Include(u => u.UserRoles)
             .ThenInclude(ur => ur.Role)
             .Where(u => u.UserRoles.Any(ur => ur.Role.Name == "Customer"))

@@ -55,6 +55,7 @@ public class ProductsController(
     {
         var product = await updateProduct.ExecuteAsync(id, createDto);
         if (product == null)
+        {
             return NotFound(new ProblemDetails
             {
                 Status = StatusCodes.Status404NotFound,
@@ -62,6 +63,7 @@ public class ProductsController(
                 Detail =
                     $"Product with ID {id}, or Category with ID {createDto.CategoryId}, or Brand with ID {createDto.BrandId} does not exist"
             });
+        }
 
         return NoContent();
     }
@@ -74,12 +76,14 @@ public class ProductsController(
     {
         var product = await setProductFeatured.ExecuteAsync(id);
         if (product == null)
+        {
             return NotFound(new ProblemDetails
             {
                 Status = StatusCodes.Status404NotFound,
                 Title = "Resource not found",
                 Detail = $"Product with ID {id} does not exist"
             });
+        }
 
         return NoContent();
     }
@@ -92,12 +96,14 @@ public class ProductsController(
     {
         var product = await removeProductFeatured.ExecuteAsync(id);
         if (product == null)
+        {
             return NotFound(new ProblemDetails
             {
                 Status = StatusCodes.Status404NotFound,
                 Title = "Resource not found",
                 Detail = $"Product with ID {id} does not exist"
             });
+        }
 
         return NoContent();
     }
@@ -111,12 +117,14 @@ public class ProductsController(
     {
         var product = await softDeleteProduct.ExecuteAsync(id);
         if (product == null)
+        {
             return NotFound(new ProblemDetails
             {
                 Status = StatusCodes.Status404NotFound,
                 Title = "Resource not found",
                 Detail = $"Product with ID {id} does not exist"
             });
+        }
 
         return NoContent();
     }
@@ -130,12 +138,14 @@ public class ProductsController(
     {
         var product = await restoreProduct.ExecuteAsync(id);
         if (product == null)
+        {
             return NotFound(new ProblemDetails
             {
                 Status = StatusCodes.Status404NotFound,
                 Title = "Resource not found",
                 Detail = $"Product with ID {id} does not exist"
             });
+        }
 
         return NoContent();
     }
@@ -148,12 +158,14 @@ public class ProductsController(
     {
         var product = await deleteProductPermanently.ExecuteAsync(id);
         if (product == null)
+        {
             return NotFound(new ProblemDetails
             {
                 Status = StatusCodes.Status404NotFound,
                 Title = "Resource not found",
                 Detail = $"Product with ID {id} does not exist"
             });
+        }
 
         return NoContent();
     }

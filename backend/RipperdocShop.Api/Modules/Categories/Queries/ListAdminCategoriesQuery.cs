@@ -8,7 +8,9 @@ public class ListAdminCategoriesQuery(ApplicationDbContext context)
 {
     public async Task<AdminCategoryResponse> ExecuteAsync(bool includeDeleted, int page, int pageSize)
     {
-        var query = context.Categories.Where(c => includeDeleted || c.DeletedAt == null);
+        var query = context.Categories
+            .AsNoTracking()
+            .Where(c => includeDeleted || c.DeletedAt == null);
 
         var totalCount = await query.CountAsync();
         var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);

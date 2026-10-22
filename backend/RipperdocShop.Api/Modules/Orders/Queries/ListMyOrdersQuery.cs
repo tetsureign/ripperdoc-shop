@@ -10,6 +10,7 @@ public class ListMyOrdersQuery(ApplicationDbContext dbContext)
     public async Task<PaginatedOrderSummaryResponse> ExecuteAsync(Guid userId, int page, int pageSize)
     {
         var query = dbContext.Orders
+            .AsNoTracking()
             .Include(o => o.OrderItems)
             .Where(o => o.UserId == userId);
 

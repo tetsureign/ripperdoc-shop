@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using RipperdocShop.Api.Data;
 using RipperdocShop.Api.Models.Entities;
 
@@ -7,6 +8,8 @@ public class GetProductByIdQuery(ApplicationDbContext context)
 {
     public async Task<Product?> ExecuteAsync(Guid id)
     {
-        return await context.Products.FindAsync(id);
+        return await context.Products
+            .AsNoTracking()
+            .FirstOrDefaultAsync(p => p.Id == id);
     }
 }

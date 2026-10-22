@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using RipperdocShop.Api.Data;
 using RipperdocShop.Api.Models.Identities;
 
@@ -7,6 +8,8 @@ public class GetUserByIdQuery(ApplicationDbContext context)
 {
     public async Task<AppUser?> ExecuteAsync(Guid id)
     {
-        return await context.Users.FindAsync(id);
+        return await context.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(u => u.Id == id);
     }
 }

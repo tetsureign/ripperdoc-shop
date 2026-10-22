@@ -11,6 +11,7 @@ public class GetProductBySlugQuery(ApplicationDbContext context)
     public async Task<ProductDto?> ExecuteAsync(string slug)
     {
         var product = await context.Products
+            .AsNoTracking()
             .Include(p => p.Category)
             .Include(p => p.Brand)
             .FirstOrDefaultAsync(p => p.Slug == slug);

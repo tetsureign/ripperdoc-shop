@@ -9,7 +9,9 @@ public class ListBrandsQuery(ApplicationDbContext context)
 {
     public async Task<PaginatedBrandResponse> ExecuteAsync(bool includeDeleted, int page, int pageSize)
     {
-        var query = context.Brands.Where(b => includeDeleted || b.DeletedAt == null);
+        var query = context.Brands
+            .AsNoTracking()
+            .Where(b => includeDeleted || b.DeletedAt == null);
 
         var totalCount = await query.CountAsync();
         var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
