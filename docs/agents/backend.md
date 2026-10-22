@@ -65,7 +65,7 @@ Use for catalog and lookup entities (e.g., `Brand`, `Category`, `Product`).
 
 ## Service Registration
 
-- Register all command and query handlers directly in `Modules/AppModulesServiceCollectionExtensions.cs` using `AddScoped`.
+- Services, commands, and queries ending with `Command`, `Query`, or `Service` in `RipperdocShop.Api.Modules` are automatically registered as scoped in [`AppModulesServiceCollectionExtensions.cs`](file:///home/nntthu/Development/ripperdoc-shop/backend/RipperdocShop.Api/Modules/AppModulesServiceCollectionExtensions.cs) via assembly scanning. No manual registration is required when adding a new handler.
 - Avoid mediator libraries (no MediatR); keep handler invocations explicit and directly injected into controllers.
 
 ## Contract Compatibility
